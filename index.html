@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>公共住宅仕様書ビューア（ローカル）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- スタイルシート読み込み -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+   <header class="app-header">
+    <h1>公共住宅建設工事共通仕様書 ビューア</h1>
+
+    <!-- 追加：PDF切り替えボタン -->
+    <div style="margin-bottom: 6px;">
+      <button type="button" onclick="openPdf('kenchiku')">建築編</button>
+      <button type="button" onclick="openPdf('denki')">電気編</button>
+      <button type="button" onclick="openPdf('kikai')">機械編</button>
+    </div>
+
+    <div class="search-row">
+      <input id="searchInput" type="search" placeholder="キーワードを入力（まだ動きません）" />
+      <select id="partFilter">
+        <option value="">全て</option>
+        <option value="建築編">建築編</option>
+        <option value="電気編">電気編</option>
+        <option value="機械編">機械編</option>
+      </select>
+    </div>
+  </header>
+
+
+  <main class="app-main">
+    <!-- 左側：検索結果（まだ空） -->
+    <section id="results" class="results">
+      <p>ここに検索結果が表示されます。（まだロジック未実装）</p>
+    </section>
+
+    <!-- 右側：PDFビューア（今はダミー表示） -->
+    <section id="viewer" class="viewer">
+      <iframe id="pdfFrame" title="仕様書PDFビューア"></iframe>
+    </section>
+  </main>
+
+  <!-- 後で検索処理を書く app.js（今日はまだ中身ほぼ空） -->
+  <script src="app.js"></script>
+</body>
+</html>
