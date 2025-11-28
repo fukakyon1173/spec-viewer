@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- スタイルシート読み込み -->
   <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#ffffff" />
+
 </head>
 <body>
    <header class="app-header">
@@ -44,5 +47,11 @@
 
   <!-- 後で検索処理を書く app.js（今日はまだ中身ほぼ空） -->
   <script src="app.js"></script>
+    <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+
 </body>
 </html>
