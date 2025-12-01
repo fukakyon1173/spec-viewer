@@ -1,5 +1,10 @@
 console.log('app.js が読み込まれました');
 
+// 画面幅で「スマホっぽいかどうか」を判定（768px以下をスマホ扱い）
+function isMobileView() {
+  return window.innerWidth <= 768;
+}
+
 // 直近の検索キーワードを保存しておく
 let currentKeyword = '';
 
@@ -41,7 +46,7 @@ async function loadIndex() {
 }
 
 // =============================
-// PDF を開く関数（右側 iframe にページ指定で表示）
+// PDF を開く関数
 // =============================
 function openPdf(kindOrItem) {
   const frame = document.getElementById('pdfFrame');
@@ -77,10 +82,22 @@ function openPdf(kindOrItem) {
     return;
   }
 
-  // 右側の iframe の中で、指定ページを表示
-  // zoom=page-width で幅いっぱいに表示させるブラウザが多い
   const url = `${encodeURI(pdf)}#page=${page}&zoom=page-width`;
-  frame.src = url;
+
+  // ★ スマホ幅のときは「検索画面 → PDF全画面 → 戻るで戻る」スタイル
+  if (isMobileView()) {
+    // 同じタブでPDFを開く → ブラウザの「戻る」で検索画面に戻れる
+    window.location.href = url;
+    return;
+  }
+
+  // ★ PCなど広い画面では右側の iframe に表示（今まで通り）
+  if (frame) {
+    frame.src = url;
+  } else {
+    // 念のため：iframeがない場合は別タブで開く
+    window.open(url, '_blank');
+  }
 }
 
 // =============================
@@ -133,7 +150,7 @@ function search() {
       <div>${snippet}…</div>
     `;
 
-    // 行クリックで該当ページを右のPDFに表示
+    // 行クリックでPDF表示
     div.onclick = () => openPdf(item);
     resultsEl.appendChild(div);
   });
@@ -156,9 +173,11 @@ window.addEventListener('DOMContentLoaded', () => {
   const resultsEl = document.getElementById('results');
   resultsEl.innerHTML = '<p>ここに検索結果が表示されます。</p>';
 
-  // 初期状態で建築編1ページ目を表示しておく（不要ならコメントアウト）
-  const frame = document.getElementById('pdfFrame');
-  if (frame) {
-    frame.src = 'kenchiku.pdf#page=1&zoom=page-width';
+  // PCなど広い画面のときだけ、初期表示で建築編1ページ目を表示
+  if (!isMobileView()) {
+    const frame = document.getElementById('pdfFrame');
+    if (frame) {
+      frame.src = 'kenchiku.pdf#page=1&zoom=page-width';
+    }
   }
 });
