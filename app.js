@@ -1,4 +1,9 @@
 console.log('app.js が読み込まれました');
+// PWA（ホーム画面アイコン）として開いているか判定
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true; // iOS 用
+}
 
 // 直近の検索キーワードを保存しておく
 let currentKeyword = '';
@@ -77,30 +82,18 @@ function openPdf(kindOrItem) {
     return;
   }
 
-  let url = `${encodeURI(pdf)}#page=${page}`;
-  if (currentKeyword) {
-    const encodedKeyword = encodeURIComponent(currentKeyword);
-    url += `&search=${encodedKeyword}`;
+  const url = `${encodeURI(pdf)}#page=${page}`;
+
+  // ★ PWA（ホーム画面アイコン）で開いている場合は、新しいタブでPDFを開く
+  if (isStandalone()) {
+    window.open(url, '_blank');  // Safari / Chrome 本体で該当ページを表示
+    return;
   }
 
-  console.log('openPdf URL:', url, 'keyword:', currentKeyword);
-
-  // 一度リセットしてから読み込み直すことで、ページ切り替えを確実にする
-  frame.onload = () => {
-    if (!currentKeyword) return;
-    try {
-      frame.contentWindow.focus();
-      frame.contentWindow.find(currentKeyword);
-    } catch (e) {
-      console.warn('PDF 内検索制御はこの環境では制限があります:', e);
-    }
-  };
-
-  frame.src = '';
-  setTimeout(() => {
-    frame.src = url;
-  }, 50);
+  // 通常ブラウザの場合は iframe に表示（今までどおり）
+  frame.src = url;
 }
+
 
 // =============================
 // 検索処理
