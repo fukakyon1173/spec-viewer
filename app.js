@@ -41,7 +41,7 @@ async function loadIndex() {
 }
 
 // =============================
-// PDF を開く関数
+// PDF を開く関数（右側 iframe にページ指定で表示）
 // =============================
 function openPdf(kindOrItem) {
   const frame = document.getElementById('pdfFrame');
@@ -77,29 +77,10 @@ function openPdf(kindOrItem) {
     return;
   }
 
-  let url = `${encodeURI(pdf)}#page=${page}`;
-  if (currentKeyword) {
-    const encodedKeyword = encodeURIComponent(currentKeyword);
-    url += `&search=${encodedKeyword}`;
-  }
-
-  console.log('openPdf URL:', url, 'keyword:', currentKeyword);
-
-  // 一度リセットしてから読み込み直すことで、ページ切り替えを確実にする
-  frame.onload = () => {
-    if (!currentKeyword) return;
-    try {
-      frame.contentWindow.focus();
-      frame.contentWindow.find(currentKeyword);
-    } catch (e) {
-      console.warn('PDF 内検索制御はこの環境では制限があります:', e);
-    }
-  };
-
-  frame.src = '';
-  setTimeout(() => {
-    frame.src = url;
-  }, 50);
+  // 右側の iframe の中で、指定ページを表示
+  // zoom=page-width で幅いっぱいに表示させるブラウザが多い
+  const url = `${encodeURI(pdf)}#page=${page}&zoom=page-width`;
+  frame.src = url;
 }
 
 // =============================
@@ -151,6 +132,8 @@ function search() {
       <small>p.${item.page}</small>
       <div>${snippet}…</div>
     `;
+
+    // 行クリックで該当ページを右のPDFに表示
     div.onclick = () => openPdf(item);
     resultsEl.appendChild(div);
   });
@@ -172,4 +155,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const resultsEl = document.getElementById('results');
   resultsEl.innerHTML = '<p>ここに検索結果が表示されます。</p>';
+
+  // 初期状態で建築編1ページ目を表示しておく（不要ならコメントアウト）
+  const frame = document.getElementById('pdfFrame');
+  if (frame) {
+    frame.src = 'kenchiku.pdf#page=1&zoom=page-width';
+  }
 });
