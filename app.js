@@ -50,17 +50,17 @@ async function loadIndex() {
 // =============================
 function openPdf(kindOrItem) {
   const frame = document.getElementById('pdfFrame');
-  let pdf = '';
+  let docKey = ''; // "kenchiku" / "denki" / "kikai"
   let page = 1;
 
   // 文字列の場合（ヘッダのボタンから）
   if (typeof kindOrItem === 'string') {
     if (kindOrItem === 'kenchiku') {
-      pdf = 'kenchiku.pdf';
+      docKey = 'kenchiku';
     } else if (kindOrItem === 'denki') {
-      pdf = 'denki.pdf';
+      docKey = 'denki';
     } else if (kindOrItem === 'kikai') {
-      pdf = 'kikai.pdf';
+      docKey = 'kikai';
     }
     page = 1;
   } else {
@@ -68,26 +68,27 @@ function openPdf(kindOrItem) {
     const item = kindOrItem;
 
     if (item.part === '建築編') {
-      pdf = 'kenchiku.pdf';
+      docKey = 'kenchiku';
     } else if (item.part === '電気編') {
-      pdf = 'denki.pdf';
+      docKey = 'denki';
     } else if (item.part === '機械編') {
-      pdf = 'kikai.pdf';
+      docKey = 'kikai';
     }
     page = item.page || 1;
   }
 
-  if (!pdf) {
+  if (!docKey) {
     alert('PDFファイルが指定されていません');
     return;
   }
 
+  const pdf = `${docKey}.pdf`;
   const url = `${encodeURI(pdf)}#page=${page}&zoom=page-width`;
 
-  // ★ スマホ幅のときは「検索画面 → PDF全画面 → 戻るで戻る」スタイル
+  // ★ スマホ幅のときは「専用ビューア」に飛ばす
   if (isMobileView()) {
-    // 同じタブでPDFを開く → ブラウザの「戻る」で検索画面に戻れる
-    window.location.href = url;
+    const viewerUrl = `mobile-viewer.html?doc=${encodeURIComponent(docKey)}&page=${encodeURIComponent(page)}`;
+    window.location.href = viewerUrl;   // 同じタブで開く（戻るボタンで検索に戻れる）
     return;
   }
 
@@ -95,7 +96,6 @@ function openPdf(kindOrItem) {
   if (frame) {
     frame.src = url;
   } else {
-    // 念のため：iframeがない場合は別タブで開く
     window.open(url, '_blank');
   }
 }
