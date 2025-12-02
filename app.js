@@ -88,7 +88,8 @@ function openPdf(kindOrItem) {
 
   // ★ スマホ端末のときは「専用ビューア」に飛ばす
   if (isMobileView()) {
-    const viewerUrl = `mobile-viewer.html?doc=${encodeURIComponent(docKey)}&page=${encodeURIComponent(page)}`;
+    const viewerUrl =
+      `mobile-viewer.html?doc=${encodeURIComponent(docKey)}&page=${encodeURIComponent(page)}`;
     console.log('mobile viewer に遷移:', viewerUrl);
     window.location.href = viewerUrl;   // 同じタブで開く（戻るボタンで検索に戻れる）
     return;
