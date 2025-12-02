@@ -1,8 +1,9 @@
 console.log('app.js が読み込まれました');
 
-// 画面幅で「スマホっぽいかどうか」を判定（768px以下をスマホ扱い）
+// 本当のスマホ端末かどうかを判定（ユーザーエージェントベース）
 function isMobileView() {
-  return window.innerWidth <= 768;
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  return /iPhone|iPad|iPod|Android/i.test(ua);
 }
 
 // 直近の検索キーワードを保存しておく
@@ -85,17 +86,21 @@ function openPdf(kindOrItem) {
   const pdf = `${docKey}.pdf`;
   const url = `${encodeURI(pdf)}#page=${page}&zoom=page-width`;
 
-  // ★ スマホ幅のときは「専用ビューア」に飛ばす
+  // ★ スマホ端末のときは「専用ビューア」に飛ばす
   if (isMobileView()) {
     const viewerUrl = `mobile-viewer.html?doc=${encodeURIComponent(docKey)}&page=${encodeURIComponent(page)}`;
+    console.log('mobile viewer に遷移:', viewerUrl);
     window.location.href = viewerUrl;   // 同じタブで開く（戻るボタンで検索に戻れる）
     return;
   }
 
-  // ★ PCなど広い画面では右側の iframe に表示（今まで通り）
+  // ★ PCなどでは右側の iframe に表示（こちらがメイン）
   if (frame) {
+    console.log('iframe に表示:', url);
     frame.src = url;
   } else {
+    // 念のため：iframe がない場合は別タブ
+    console.warn('pdfFrame が見つからないため、新しいタブで開きます:', url);
     window.open(url, '_blank');
   }
 }
@@ -173,11 +178,13 @@ window.addEventListener('DOMContentLoaded', () => {
   const resultsEl = document.getElementById('results');
   resultsEl.innerHTML = '<p>ここに検索結果が表示されます。</p>';
 
-  // PCなど広い画面のときだけ、初期表示で建築編1ページ目を表示
+  // PCなど（スマホ以外）のときだけ、初期表示で建築編1ページ目を表示
   if (!isMobileView()) {
     const frame = document.getElementById('pdfFrame');
     if (frame) {
-      frame.src = 'kenchiku.pdf#page=1&zoom=page-width';
+      const url = 'kenchiku.pdf#page=1&zoom=page-width';
+      console.log('初期表示 iframe:', url);
+      frame.src = url;
     }
   }
 });
