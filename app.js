@@ -1,9 +1,8 @@
 console.log('app.js が読み込まれました');
 
-// 本当のスマホ端末かどうかを判定（ユーザーエージェントベース）
+// 画面幅で「スマホっぽいかどうか」を判定（768px以下をスマホ扱い）
 function isMobileView() {
-  const ua = navigator.userAgent || navigator.vendor || window.opera;
-  return /iPhone|iPad|iPod|Android/i.test(ua);
+  return window.innerWidth <= 768;
 }
 
 // 直近の検索キーワードを保存しておく
@@ -83,29 +82,21 @@ function openPdf(kindOrItem) {
     return;
   }
 
-  // PDF ファイル名
   const pdf = `${docKey}.pdf`;
+  const url = `${encodeURI(pdf)}#page=${page}&zoom=page-width`;
 
-  // iframe 用 URL（?v=タイムスタンプ を付けて毎回“別URL”にする）
-  const cacheBuster = `v=${Date.now()}`;
-  const iframeUrl = `${encodeURI(pdf)}?${cacheBuster}#page=${page}&zoom=page-width`;
-
-  // ★ スマホ端末のときは「専用ビューア」に飛ばす（こちらは従来どおり）
+  // ★ スマホ幅のときは「専用ビューア」に飛ばす
   if (isMobileView()) {
-    const viewerUrl =
-      `mobile-viewer.html?doc=${encodeURIComponent(docKey)}&page=${encodeURIComponent(page)}`;
-    console.log('mobile viewer に遷移:', viewerUrl);
+    const viewerUrl = `mobile-viewer.html?doc=${encodeURIComponent(docKey)}&page=${encodeURIComponent(page)}`;
     window.location.href = viewerUrl;   // 同じタブで開く（戻るボタンで検索に戻れる）
     return;
   }
 
-  // ★ PCなどでは右側の iframe に表示（こちらがメイン）
+  // ★ PCなど広い画面では右側の iframe に表示（今まで通り）
   if (frame) {
-    console.log('iframe に表示:', iframeUrl);
-    frame.src = iframeUrl;
+    frame.src = url;
   } else {
-    console.warn('pdfFrame が見つからないため、新しいタブで開きます:', iframeUrl);
-    window.open(iframeUrl, '_blank');
+    window.open(url, '_blank');
   }
 }
 
@@ -182,14 +173,11 @@ window.addEventListener('DOMContentLoaded', () => {
   const resultsEl = document.getElementById('results');
   resultsEl.innerHTML = '<p>ここに検索結果が表示されます。</p>';
 
-  // PCなど（スマホ以外）のときだけ、初期表示で建築編1ページ目を表示
+  // PCなど広い画面のときだけ、初期表示で建築編1ページ目を表示
   if (!isMobileView()) {
     const frame = document.getElementById('pdfFrame');
     if (frame) {
-      const cacheBuster = `v=${Date.now()}`;
-      const url = `kenchiku.pdf?${cacheBuster}#page=1&zoom=page-width`;
-      console.log('初期表示 iframe:', url);
-      frame.src = url;
+      frame.src = 'kenchiku.pdf#page=1&zoom=page-width';
     }
   }
 });
